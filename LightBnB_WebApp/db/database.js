@@ -51,7 +51,7 @@ const getUserWithEmail = function (email = 'sebastianguerra@ymail.com') {
  * @return {Promise<{}>} A promise to the user.
  */
 
-const getUserWithId = function (id = 10) {
+const getUserWithId = function (id) {
   return pool
     .query(`
     SELECT *
@@ -67,7 +67,6 @@ const getUserWithId = function (id = 10) {
       return null;
     })
 };
-// getUserWithId();
 
 /**
  * Add a new user to the database.
@@ -76,11 +75,7 @@ const getUserWithId = function (id = 10) {
  */
 
 
-const addUser = function (user = {
-  name: 'AD',
-  email: 'ad@gmail.com',
-  password: 'secret'
-}) {
+const addUser = function (user) {
   return pool
     .query(`
       INSERT INTO users 
@@ -96,7 +91,6 @@ const addUser = function (user = {
       console.log(err.message);
     })
 };
-// addUser();
 
 /// Reservations
 
