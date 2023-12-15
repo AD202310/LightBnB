@@ -27,23 +27,24 @@ const pool = new Pool ({
  * @return {Promise<{}>} A promise to the user.
  */
 
-const getUserWithEmail = function (email = 'sebastianguerra@ymail.com') {
-  return pool
-    .query(`
-    SELECT *
-    FROM users
-    WHERE email = $1
-    `, [email])
-    .then ((result) => {
-      console.log(result.rows);
-      return result.rows;
+const getUserWithEmail = function (email) {
+  const promise = pool
+  .query(
+    `SELECT * FROM users
+    WHERE email = $1`,
+    [email])
+  .then((res) => {
+    if(!res.rows.length){
+      return(null)
+    }
+    return res.rows[0];
     })
-    .catch((err) => {
-      console.log(err.message);
-      return null;
-    })
+  .catch((err) => {
+    console.log(err.message);
+    });
+
+  return promise;
 };
-// getUserWithEmail();
 
 /**
  * Get a single user from the database given their id.
@@ -99,9 +100,34 @@ const addUser = function (user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
+
 const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  const queryString = `
+  SELECT properties.*, reservations.*, ROUND(AVG(rating),2) as average_rating
+  FROM properties
+  JOIN reservations ON reservations.property_id = properties.id
+  JOIN users ON guest_id = users.id
+  JOIN property_reviews ON property_reviews.property_id = properties.id
+  WHERE users.id = $1
+  AND end_date < now()::date
+  GROUP BY properties.id, reservations.id
+  ORDER BY start_date
+  LIMIT $2;
+  `;
+  const values = [guest_id, limit];
+
+  return pool
+    .query(queryString, values)
+    .then ((result) => {
+      console.log(result.rows);
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    })
 };
+
+
 
 /// Properties
 
